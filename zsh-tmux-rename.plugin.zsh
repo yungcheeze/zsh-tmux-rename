@@ -21,7 +21,6 @@ rename-tmux-window() {
   fi
 
   # in worktree
-  echo $git_dir
   if echo "$git_dir" | grep "worktrees" > /dev/null; then
     worktree_name="$(basename $git_dir)"
     repo_name="$(basename $(dirname $(dirname $git_dir)))"
