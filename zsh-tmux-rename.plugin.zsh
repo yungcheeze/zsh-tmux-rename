@@ -8,7 +8,7 @@ rename-tmux-window() {
 
   pane_name="${PWD##*/}"
 
-  git_dir="$(git rev-parse --absolute-git-dir)"
+  git_dir="$(git rev-parse --absolute-git-dir 2>/dev/null)"
 
   # in root of bare repo
   if [[ -n "$git_dir" ]]; then
@@ -16,7 +16,7 @@ rename-tmux-window() {
   fi
 
   # in root of normal repo
-  if [[ "$(basename $git_dir)" == ".git" ]]; then
+  if [[ "$(basename $git_dir 2>/dev/null)" == ".git" ]]; then
     pane_name="$(basename $(dirname $git_dir))"
   fi
 
