@@ -6,17 +6,36 @@
 rename-tmux-window() {
   [[ -z "$TMUX" ]] && return
 
-  LANG=en_US.UTF-8 vcs_info
-  if [[ -n "$vcs_info_msg_0_" ]]; then
-    tmux set-option -w automatic-rename-format "${vcs_info_msg_0_}"
-  else
-    tmux set-option -w automatic-rename-format "${PWD##*/}"
-  fi
-}
+  pane_name="${PWD##*/}"
 
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git svn
-zstyle ':vcs_info:*' formats '%r'
+  git_dir="$(git rev-parse --absolute-git-dir)"
+
+  # in root of bare repo
+  if [[ -n "$git_dir" ]]; then
+    pane_name="$(basename $git_dir)"
+  fi
+
+  # in root of normal repo
+  if [[ "$(basename $git_dir)" == ".git" ]]; then
+    pane_name="$(basename $(dirname $git_dir))"
+  fi
+
+  # in worktree
+  echo $git_dir
+  if echo "$git_dir" | grep "worktrees" > /dev/null; then
+    worktree_name="$(basename $git_dir)"
+    repo_name="$(basename $(dirname $(dirname $git_dir)))"
+    pane_name="$repo_name - $worktree_name"
+  fi
+
+
+  if [[ -n $TMUX_PROJECT_NAME ]]; then
+    pane_name="$TMUX_PROJECT_NAME - $pane_name"
+  fi
+
+  tmux set-option -w automatic-rename-format "$pane_name"
+
+}
 
 autoload -Uz add-zsh-hook
 add-zsh-hook chpwd rename-tmux-window
